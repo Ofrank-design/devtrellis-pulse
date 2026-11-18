@@ -1,0 +1,2 @@
+include LICENSE NOTICE README.md pulse.example.yml
+recursive-include docs *.md

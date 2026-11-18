@@ -1,0 +1,6 @@
+title: "[Idea] "
+body:
+  - type: textarea
+    id: idea
+    attributes: {label: Your idea}
+    validations: {required: true}

@@ -1,0 +1,8 @@
+# Commits Pulse's own report files and nothing else. Review the first run by hand.
+version: 1
+runtime:
+  mode: standard
+reports:
+  write_to_repository: true
+commit:
+  enabled: true

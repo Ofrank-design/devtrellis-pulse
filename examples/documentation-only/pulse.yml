@@ -1,0 +1,8 @@
+version: 1
+tasks:
+  documentation:
+    enabled: true
+  repository_health:
+    enabled: false
+  dependency_inventory:
+    enabled: false

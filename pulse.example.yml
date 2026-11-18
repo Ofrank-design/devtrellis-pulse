@@ -1,0 +1,135 @@
+# DevTrellis Pulse configuration.
+# Safe defaults: read only mode, no commits, no push, no network, no deletion.
+# Run `pulse validate-config` after editing.
+
+# Configuration schema version.
+version: 1
+
+# Project identity used in reports.
+project:
+  name: repository
+  description: ''
+  timezone: UTC
+
+# Target repository and the state it must be in.
+repository:
+  path: .
+  expected_branch: null
+  require_git: true
+  require_clean_start: true
+  allow_detached_head: false
+  allow_shallow_clone: true
+
+# Execution mode and resource limits. mode: safe (read only) or standard.
+runtime:
+  mode: safe
+  dry_run_by_default: true
+  fail_fast: false
+  max_runtime_seconds: 900
+  max_operations_per_run: 40
+  max_task_runtime_seconds: 180
+  max_output_kilobytes_per_task: 128
+  lock_wait_seconds: 0
+
+# Bounds on retries and on how much a run may change.
+limits:
+  max_retries_per_task: 0
+  max_changed_files_per_run: 25
+  max_changed_bytes_per_run: 1048576
+
+# Used by `pulse schedule` and `pulse run --scheduled`. Pulse has no daemon.
+schedule:
+  enabled: false
+  weekdays:
+  - mon
+  - wed
+  - fri
+  timezone: UTC
+  missed_run_policy: skip
+
+# Built in tasks. Tasks that run repository code are disabled by default.
+tasks:
+  documentation:
+    enabled: true
+    mode: check
+    required_files:
+    - README.md
+    - LICENSE
+    required_readme_sections: []
+    forbidden_markers: []
+    generated_cli_reference: ''
+  tests:
+    enabled: false
+    commands:
+    - - python
+      - -m
+      - pytest
+      - -q
+    timeout_seconds: 240
+  code_hygiene:
+    enabled: false
+    mode: check
+    commands:
+    - - ruff
+      - check
+      - .
+    write_commands: []
+    paths: []
+    timeout_seconds: 120
+  repository_health:
+    enabled: true
+    write_snapshot: false
+  dependency_inventory:
+    enabled: true
+
+# Path and capability permissions. Denied paths always win.
+policy:
+  allowed_read_paths:
+  - '**'
+  allowed_write_paths:
+  - reports/pulse/**
+  denied_paths:
+  - .git/**
+  - .env
+  - .env.*
+  - '**/*.pem'
+  - '**/*.key'
+  - '**/id_rsa*'
+  allow_subprocesses: true
+  allow_network: false
+  allow_deleting_files: false
+  allow_symlinks: false
+
+# Commit and push controls. Off by default and never forced.
+commit:
+  enabled: false
+  push: false
+  remote: null
+  branch: null
+  author_name: DevTrellis Pulse
+  author_email: pulse-bot@example.invalid
+  message_prefix: chore(pulse)
+  group_by: task
+  require_validation: true
+  require_clean_start: true
+  allow_paths:
+  - reports/pulse/**
+  max_file_kilobytes: 512
+
+# Activity ledger. Empty path means the default state directory.
+ledger:
+  path: ''
+  retention_days: 90
+  max_file_megabytes: 25
+
+# Report outputs. Written to the state directory unless write_to_repository is true.
+reports:
+  format:
+  - markdown
+  - json
+  output_directory: reports/pulse
+  write_to_repository: false
+  include_diff_stat: true
+  include_task_output: false
+  redact_patterns:
+  - (?i)token=[^& ]+
