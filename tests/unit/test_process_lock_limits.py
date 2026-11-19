@@ -155,3 +155,20 @@ def test_lock_can_wait_a_bounded_time(tmp_path):
     with pytest.raises(LockError):
         RunLock(path, wait_seconds=0.5).acquire()
     assert 0.4 < time.monotonic() - started < 5
+
+
+def test_pid_check_sees_this_process_and_a_dead_one():
+    from devtrellis_pulse.scheduling.lock import _pid_alive
+
+    assert _pid_alive(os.getpid())
+    assert not _pid_alive(2**22 + 777)
+
+
+def test_pid_check_never_signals_on_windows():
+    # os.kill(pid, 0) sends Ctrl+C on Windows, so the code must not reach it there.
+    import inspect
+
+    from devtrellis_pulse.scheduling import lock
+
+    source = inspect.getsource(lock._pid_alive)
+    assert source.index('sys.platform == "win32"') < source.index("os.kill")

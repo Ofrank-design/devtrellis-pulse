@@ -7,6 +7,7 @@ Format follows Keep a Changelog and Semantic Versioning.
 First release.
 
 ### Fixed
+- Windows: the run lock no longer sends Ctrl+C to the console when checking whether the previous owner is still running
 - Absolute paths such as `/etc` were not rejected in configuration on Windows
 - Windows: timezone lookup no longer fails without a timezone database (adds `tzdata` on Windows), stopping a timed out or cancelled command now ends its whole process tree
 
