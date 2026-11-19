@@ -212,3 +212,17 @@ def test_environment_can_never_enable_commits_or_network(tmp_path):
     assert cfg["commit"]["enabled"] is False
     assert cfg["policy"]["allow_network"] is False
     assert cfg.env_applied == []
+
+
+@pytest.mark.parametrize("bad", ["/etc", "\\windows", "C:/x", "c:\\x", "../out", "a/../../b", "  "])
+def test_unsafe_paths_are_caught_on_every_platform(bad):
+    from devtrellis_pulse.core.config import is_unsafe_relative
+
+    assert is_unsafe_relative(bad)
+
+
+@pytest.mark.parametrize("good", ["reports/pulse", "docs", "a/b.md", "./x"])
+def test_ordinary_relative_paths_are_fine(good):
+    from devtrellis_pulse.core.config import is_unsafe_relative
+
+    assert not is_unsafe_relative(good)

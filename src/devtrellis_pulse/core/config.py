@@ -186,12 +186,24 @@ class Config(dict):
 # ---- glob helpers -----------------------------------------------------------------------
 
 
+def is_unsafe_relative(path: str) -> bool:
+    """True for empty, absolute or parent escaping paths, whatever the host operating system.
+
+    Checked by hand so `/etc` and `C:\\x` are caught on every platform. On Windows, a path
+    like `/etc` has no drive letter and Path.is_absolute() would call it relative.
+    """
+    text = path.strip().replace("\\", "/")
+    if not text or text.startswith("/") or re.match(r"^[A-Za-z]:", text):
+        return True
+    return ".." in text.split("/")
+
+
 def validate_glob(pattern: Any, where: str) -> str:
     if not isinstance(pattern, str) or not pattern.strip():
         raise ConfigError(f"{where}: glob patterns must be non empty strings")
     if "\0" in pattern or "\\" in pattern:
         raise ConfigError(f"{where}: invalid characters in pattern {pattern!r}")
-    if pattern.startswith("/") or ".." in pattern.split("/"):
+    if is_unsafe_relative(pattern):
         raise ConfigError(f"{where}: pattern must be relative and inside the repository: {pattern}")
     return pattern
 
@@ -347,7 +359,7 @@ def validate(data: Any) -> Config:
     hygiene["paths"] = [validate_glob(p, "tasks.code_hygiene.paths") for p in hygiene["paths"]]
 
     out_dir = cfg["reports"]["output_directory"]
-    if not out_dir.strip() or Path(out_dir).is_absolute() or ".." in Path(out_dir).parts:
+    if is_unsafe_relative(out_dir):
         raise ConfigError("reports.output_directory: must be a relative path inside the repository")
 
     safe = cfg["runtime"]["mode"] == "safe"

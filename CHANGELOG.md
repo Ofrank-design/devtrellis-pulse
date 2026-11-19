@@ -7,6 +7,7 @@ Format follows Keep a Changelog and Semantic Versioning.
 First release.
 
 ### Fixed
+- Absolute paths such as `/etc` were not rejected in configuration on Windows
 - Windows: timezone lookup no longer fails without a timezone database (adds `tzdata` on Windows), stopping a timed out or cancelled command now ends its whole process tree
 
 ### Added
